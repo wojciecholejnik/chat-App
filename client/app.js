@@ -1,4 +1,5 @@
 let userName = '';
+const socket = io();
 
 {
   const loginForm = document.getElementById('welcome-form');
@@ -8,10 +9,15 @@ let userName = '';
   const userNameInput = document.getElementById('username');
   const messageContentInput = document.getElementById('message-content');
 
+  //Listeners
+  socket.on('message', ({ author, content }) => addMessage(author, content))
+
   // Login
   loginForm.addEventListener('submit', function(event){
     event.preventDefault();
     login();
+    socket.emit('login', userName)
+
   });
 
   const login = function(){
@@ -34,6 +40,7 @@ let userName = '';
   const sendMessage = function(username, textField){
     if(textField){
       addMessage(username, textField);
+      socket.emit('message', {author: userName, content: textField})
       messageContentInput.value = ''
     } else {
       window.alert('Type your message !')
@@ -45,6 +52,7 @@ let userName = '';
     message.classList.add('message');
     message.classList.add('message--received');
     if(author === userName) message.classList.add('message--self');
+    if(author == 'Chat Bot') message.classList.add('message--bot');
     message.innerHTML = `
       <h3 class="message__author">${userName === author ? 'You' : author }</h3>
       <div class="message__content">
@@ -53,4 +61,5 @@ let userName = '';
     `;
     messagesList.appendChild(message);
   }
+
 }
